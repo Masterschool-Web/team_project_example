@@ -1,4 +1,9 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app"; // V9
+import {
+  getAuth,
+  createUserWithEmailAndPassword, // BUILT-IN SIGNUP
+  signInWithEmailAndPassword, // BUILT-IN LOGIN
+} from "firebase/auth"; // V9
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -13,3 +18,11 @@ console.log(firebaseConfig);
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// init auth
+
+const auth = getAuth(app);
+
+export default app;
+
+export { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword };
