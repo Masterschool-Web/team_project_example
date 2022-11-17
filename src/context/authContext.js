@@ -29,7 +29,7 @@ const AuthProvider = ({ children }) => {
   };
   // signout - logout
   const logout = async () => {
-    await auth.logout();
+    await auth.signOut();
   };
 
   // FIREBASE LISTENS TO ANY CHANGE IN THE USER STATUS
