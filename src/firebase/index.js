@@ -10,6 +10,11 @@ import {
   getFirestore,
   collection,
   addDoc,
+  doc,
+  getDoc,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -20,8 +25,6 @@ const firebaseConfig = {
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_APP_ID,
 };
-
-console.log(firebaseConfig);
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -41,4 +44,9 @@ export {
   collection,
   addDoc,
   serverTimestamp,
+  doc,
+  getDoc,
+  query,
+  where,
+  getDocs,
 };

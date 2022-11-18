@@ -6,11 +6,14 @@ function App() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  console.log(user);
+
   if (user)
     return (
       <div>
         <h2>Hello {user.email}</h2>
         <button onClick={logout}>LOGOUT</button>
+        <button onClick={() => navigate("/profile")}>PROFILE</button>
       </div>
     );
   return (
