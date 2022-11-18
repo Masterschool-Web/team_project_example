@@ -10,7 +10,7 @@ const Profile = () => {
   const [date] = jsonToday;
   const [profile, setProfile] = useState({
     name: "",
-    city: "",
+    city: "amsterdam",
     startDate: date,
     endDate: null,
     guests: 0,
@@ -28,7 +28,36 @@ const Profile = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(profile);
+    if (!profile.name) {
+      return setError("Name is required");
+    }
+
+    if (!profile.city) {
+      return setError("City is required");
+    }
+
+    const startDate = new Date(profile.startDate);
+    const dateObj = new Date(date);
+    const endDate = new Date(profile.endDate);
+
+    if (startDate.getTime() < dateObj.getTime()) {
+      return setError("Start date should be later than today");
+    }
+
+    if (endDate.getTime() <= dateObj.getTime()) {
+      return setError("End date should be later than today");
+    }
+
+    if (endDate.getTime() <= startDate.getTime()) {
+      return setError("End date should be later than start date");
+    }
+
+    if (profile.guests <= 0) {
+      return setError("Number of guests should be greater than 0");
+    }
+
+    setError("");
+
     try {
       //   setLoading(true);
       //   // go to db
@@ -78,10 +107,11 @@ const Profile = () => {
             })
           }
           value={profile.city}
-          defaultValue='amsterdam'
         >
           <option disabled>Choose...</option>
-          <option value='amsterdam'>Amsterdam</option>
+          <option default value='amsterdam'>
+            Amsterdam
+          </option>
           <option value='utrecht'>Utrecht</option>
           <option value='rotterdam'>Rotterdam</option>
           <option value='den haag'>Den Haag</option>
@@ -118,7 +148,6 @@ const Profile = () => {
             })
           }
           value={profile.gender}
-          defaultValue=''
         >
           <option disabled>Choose...</option>
           <option default value=''>
@@ -147,7 +176,6 @@ const Profile = () => {
             })
           }
           value={profile.kids}
-          defaultValue={false}
         >
           <option disabled>Choose...</option>
           <option default value={true}>
