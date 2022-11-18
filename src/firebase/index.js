@@ -10,6 +10,11 @@ import {
   getFirestore,
   collection,
   addDoc,
+  doc,
+  getDoc,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -39,4 +44,9 @@ export {
   collection,
   addDoc,
   serverTimestamp,
+  doc,
+  getDoc,
+  query,
+  where,
+  getDocs,
 };

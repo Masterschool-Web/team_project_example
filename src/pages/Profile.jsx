@@ -8,20 +8,31 @@ const Profile = () => {
   const today = new Date();
   const jsonToday = today.toJSON().split("T");
   const [date] = jsonToday;
+  // const [profile, setProfile] = useState({
+  //   name: "",
+  //   city: "amsterdam",
+  //   startDate: date,
+  //   endDate: null,
+  //   guests: 0,
+  //   gender: "",
+  //   kids: false,
+  //   active: false,
+  // });
+
   const [profile, setProfile] = useState({
-    name: "",
+    name: "david",
     city: "amsterdam",
     startDate: date,
-    endDate: null,
-    guests: 0,
+    endDate: "2022-11-29",
+    guests: 12,
     gender: "",
     kids: false,
-    active: false,
+    active: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { addProfile } = useProfile();
+  const { addProfile, getUserProfile, userProfile } = useProfile();
   const { user, userLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -59,19 +70,26 @@ const Profile = () => {
     setError("");
 
     try {
-      //   setLoading(true);
-      //   // go to db
-      await addProfile(profile);
-      //   setLoading(false);
-
+      setLoading(true);
+      await addProfile({
+        ...profile,
+        userId: user.uid,
+      });
+      setLoading(false);
+      setError("");
       //   // navigate to a different page
       //   navigate("/");
     } catch (err) {
       //   setLoading(false);
-      //   console.log(err);
-      //   setError(processFirebaseErrors(err.message));
+      console.log(err);
+      setError(processFirebaseErrors(err.message));
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) getUserProfile(user.uid);
+  }, [user, getUserProfile]);
 
   useEffect(() => {
     if (!user & !userLoading) {
@@ -80,6 +98,26 @@ const Profile = () => {
   }, [user, userLoading, navigate]);
 
   if (loading || userLoading) return <div>loading...</div>;
+
+  if (userProfile)
+    return (
+      <div>
+        <h1>{user.email}</h1>
+        <p>Name: {userProfile.name}</p>
+        <p>City: {userProfile.city}</p>
+        <p>
+          preferred guests' gender:{" "}
+          {!userProfile.gender ? "Non preferred" : userProfile.gender}
+        </p>
+        <p>Number of guests: {userProfile.guests}</p>
+        <p>Kids allowed: {userProfile.kids ? "yes" : "no"}</p>
+        <p>
+          {userProfile.startDate}-{userProfile.endDate}
+        </p>
+        <button>Edit</button>
+        <button>Delete</button>
+      </div>
+    );
 
   return (
     <>

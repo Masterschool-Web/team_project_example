@@ -1,5 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { db, addDoc, collection, serverTimestamp } from "../firebase";
+import {
+  db,
+  addDoc,
+  collection,
+  serverTimestamp,
+  doc,
+  getDoc,
+  query,
+  where,
+  getDocs,
+} from "../firebase";
 
 const ProfileContext = createContext();
 
@@ -16,6 +26,8 @@ const ProfileProvider = ({ children }) => {
   // U- UPDATE
   // D- DELETE
 
+  const [userProfile, setUserProfile] = useState();
+
   // POST (ADD)
   const addProfile = async (profile) => {
     if (!profile.userId) {
@@ -30,7 +42,19 @@ const ProfileProvider = ({ children }) => {
     });
   };
 
-  // GET
+  // GET USER PROFILE
+  const getUserProfile = async (userId) => {
+    if (typeof userId !== "string") {
+      throw new Error("user id must be a string");
+    }
+
+    const colRef = collection(db, "profiles");
+    const q = query(colRef, where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      setUserProfile(doc.data());
+    });
+  };
 
   // UPDATE/PUT (SET)
 
@@ -38,6 +62,8 @@ const ProfileProvider = ({ children }) => {
 
   const exports = {
     addProfile,
+    getUserProfile,
+    userProfile,
   };
 
   return (
