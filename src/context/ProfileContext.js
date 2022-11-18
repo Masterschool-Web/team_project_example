@@ -36,7 +36,9 @@ const ProfileProvider = ({ children }) => {
 
   // DELETE
 
-  const exports = {};
+  const exports = {
+    addProfile,
+  };
 
   return (
     <ProfileContext.Provider value={exports}>

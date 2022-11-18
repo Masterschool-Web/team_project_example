@@ -18,6 +18,7 @@ const useAuth = () => {
 const AuthProvider = ({ children }) => {
   // state -> user inforamtion
   const [user, setUser] = useState();
+  const [userLoading, setUserLoading] = useState(true);
 
   // signup - register
   const register = async ({ email, password }) => {
@@ -39,6 +40,7 @@ const AuthProvider = ({ children }) => {
     // stateChange
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setUser(user);
+      setUserLoading(false);
     });
 
     // when component unmount -> when the component is not in use
@@ -53,6 +55,7 @@ const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
+    userLoading,
   };
 
   return (
