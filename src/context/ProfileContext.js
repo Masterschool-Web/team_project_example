@@ -1,14 +1,15 @@
+import { deleteDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
   db,
   addDoc,
   collection,
   serverTimestamp,
-  doc,
-  getDoc,
+  setDoc,
   query,
   where,
   getDocs,
+  doc,
 } from "../firebase";
 
 const ProfileContext = createContext();
@@ -52,18 +53,36 @@ const ProfileProvider = ({ children }) => {
     const q = query(colRef, where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-      setUserProfile(doc.data());
+      const data = doc.data();
+      setUserProfile({ ...data, id: doc.id });
     });
   };
 
   // UPDATE/PUT (SET)
+  const editUserProfile = async (profile) => {
+    if (!profile.id) {
+      throw new Error("Profile needs an id");
+    }
+
+    const docRef = doc(db, "profiles", profile.id);
+    await setDoc(docRef, {
+      ...profile,
+      updatedAt: serverTimestamp(),
+    });
+  };
 
   // DELETE
+  const deleteUserProfile = async (profileId) => {
+    const docRef = doc(db, "profiles", profileId);
+    await deleteDoc(docRef);
+  };
 
   const exports = {
     addProfile,
     getUserProfile,
     userProfile,
+    editUserProfile,
+    deleteUserProfile,
   };
 
   return (

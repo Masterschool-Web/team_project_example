@@ -19,37 +19,49 @@ const Profile = () => {
   //   active: false,
   // });
 
-  const [profile, setProfile] = useState({
-    name: "david",
-    city: "amsterdam",
-    startDate: date,
-    endDate: "2022-11-29",
-    guests: 12,
-    gender: "",
-    kids: false,
-    active: true,
-  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [editor, setEditor] = useState(false);
 
-  const { addProfile, getUserProfile, userProfile } = useProfile();
+  const {
+    addProfile,
+    getUserProfile,
+    userProfile,
+    editUserProfile,
+    deleteUserProfile,
+  } = useProfile();
   const { user, userLoading } = useAuth();
   const navigate = useNavigate();
+
+  const [form, setForm] = useState(
+    userProfile ?? {
+      name: "",
+      city: "amsterdam",
+      startDate: date,
+      endDate: null,
+      guests: 0,
+      gender: "",
+      kids: false,
+      active: false,
+    }
+  );
+
+  // TODO: if there is profile, you cannot submit new one!
 
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    if (!profile.name) {
+    if (!form.name) {
       return setError("Name is required");
     }
 
-    if (!profile.city) {
+    if (!form.city) {
       return setError("City is required");
     }
 
-    const startDate = new Date(profile.startDate);
+    const startDate = new Date(form.startDate);
     const dateObj = new Date(date);
-    const endDate = new Date(profile.endDate);
+    const endDate = new Date(form.endDate);
 
     if (startDate.getTime() < dateObj.getTime()) {
       return setError("Start date should be later than today");
@@ -63,7 +75,7 @@ const Profile = () => {
       return setError("End date should be later than start date");
     }
 
-    if (profile.guests <= 0) {
+    if (form.guests <= 0) {
       return setError("Number of guests should be greater than 0");
     }
 
@@ -71,14 +83,26 @@ const Profile = () => {
 
     try {
       setLoading(true);
-      await addProfile({
-        ...profile,
-        userId: user.uid,
-      });
+
+      if (!editor) {
+        await addProfile({
+          ...form,
+          userId: user.uid,
+        });
+      }
+
+      if (editor) {
+        await editUserProfile({
+          ...form,
+          userId: user.uid,
+        });
+      }
+
+      // snapshot === "event listener"
+      await getUserProfile(user.uid);
+      setEditor(false);
       setLoading(false);
       setError("");
-      //   // navigate to a different page
-      //   navigate("/");
     } catch (err) {
       //   setLoading(false);
       console.log(err);
@@ -97,9 +121,34 @@ const Profile = () => {
     }
   }, [user, userLoading, navigate]);
 
+  // const setFormWithProfile = async () => {
+  // await getUserProfile(user.uid);
+  // setForm(userProfile);
+  // }
+
+  const openEditor = () => {
+    setEditor(true);
+    setForm(userProfile);
+  };
+
+  const deleteDocument = () => {
+    deleteUserProfile(userProfile.id);
+    // TODO: After deleting, how do we rerender the component
+    // because we want to see empty profile form
+  };
+
+  // 1. press on "edit"
+  // => change to form
+  // => form is not empty
+  // => form is full of the data from database
+  // submit button
+
+  // 2. press on submit
+  // => update the firebase database
+
   if (loading || userLoading) return <div>loading...</div>;
 
-  if (userProfile)
+  if (userProfile && !editor)
     return (
       <div>
         <h1>{user.email}</h1>
@@ -114,24 +163,32 @@ const Profile = () => {
         <p>
           {userProfile.startDate}-{userProfile.endDate}
         </p>
-        <button>Edit</button>
-        <button>Delete</button>
+        <button onClick={openEditor}>Edit</button>
+        <button onClick={deleteDocument}>Delete</button>
       </div>
     );
 
   return (
     <>
       <Link to='/'>Back</Link>
-      <form onSubmit={onSubmit}>
+      <form
+        onSubmit={onSubmit}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "400px",
+          gap: "12px",
+        }}
+      >
         <h1>Profile</h1>
         {error && <p style={{ color: "red" }}>{error}</p>}
         <label>Name</label>
         <input
           type='text'
-          value={profile.name}
+          value={form.name}
           onChange={(e) => {
-            setProfile({
-              ...profile,
+            setForm({
+              ...form,
               name: e.target.value,
             });
           }}
@@ -139,12 +196,12 @@ const Profile = () => {
         <label>City</label>
         <select
           onChange={(e) =>
-            setProfile({
-              ...profile,
+            setForm({
+              ...form,
               city: e.target.value,
             })
           }
-          value={profile.city}
+          value={form.city}
         >
           <option disabled>Choose...</option>
           <option default value='amsterdam'>
@@ -158,10 +215,10 @@ const Profile = () => {
         <label>Start Date</label>
         <input
           type='date'
-          value={profile.startDate}
+          value={form.startDate}
           onChange={(e) => {
-            setProfile({
-              ...profile,
+            setForm({
+              ...form,
               startDate: e.target.value,
             });
           }}
@@ -169,10 +226,10 @@ const Profile = () => {
         <label>End Date</label>
         <input
           type='date'
-          value={profile.endDate}
+          value={form.endDate}
           onChange={(e) => {
-            setProfile({
-              ...profile,
+            setForm({
+              ...form,
               endDate: e.target.value,
             });
           }}
@@ -180,12 +237,12 @@ const Profile = () => {
         <label>Gender</label>
         <select
           onChange={(e) =>
-            setProfile({
-              ...profile,
+            setForm({
+              ...form,
               gender: e.target.value,
             })
           }
-          value={profile.gender}
+          value={form.gender}
         >
           <option disabled>Choose...</option>
           <option default value=''>
@@ -197,10 +254,10 @@ const Profile = () => {
         <label>Guests</label>
         <input
           type='number'
-          value={profile.guests}
+          value={form.guests}
           onChange={(e) => {
-            setProfile({
-              ...profile,
+            setForm({
+              ...form,
               guests: e.target.value < 0 ? 0 : parseInt(e.target.value),
             });
           }}
@@ -208,12 +265,12 @@ const Profile = () => {
         <label>Kids</label>
         <select
           onChange={(e) =>
-            setProfile({
-              ...profile,
+            setForm({
+              ...form,
               kids: e.target.value,
             })
           }
-          value={profile.kids}
+          value={form.kids}
         >
           <option disabled>Choose...</option>
           <option default value={true}>
@@ -221,7 +278,11 @@ const Profile = () => {
           </option>
           <option value={false}>Kids are welcome</option>
         </select>
-        <input type='submit' value='SUBMIT' />
+        {!editor ? (
+          <input type='submit' value='SUBMIT' />
+        ) : (
+          <input type='submit' value='EDIT' />
+        )}
       </form>
     </>
   );
