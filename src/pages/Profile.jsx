@@ -29,22 +29,24 @@ const Profile = () => {
     userProfile,
     editUserProfile,
     deleteUserProfile,
+    clearProfile,
   } = useProfile();
   const { user, userLoading } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState(
-    userProfile ?? {
-      name: "",
-      city: "amsterdam",
-      startDate: date,
-      endDate: null,
-      guests: 0,
-      gender: "",
-      kids: false,
-      active: false,
-    }
-  );
+  const emptyForm = {
+    name: "",
+    city: "amsterdam",
+    startDate: date,
+    endDate: null,
+    guests: 0,
+    gender: "",
+    kids: false,
+    email: "",
+    description: "",
+  };
+
+  const [form, setForm] = useState(userProfile ?? emptyForm);
 
   // TODO: if there is profile, you cannot submit new one!
 
@@ -131,10 +133,19 @@ const Profile = () => {
     setForm(userProfile);
   };
 
-  const deleteDocument = () => {
-    deleteUserProfile(userProfile.id);
-    // TODO: After deleting, how do we rerender the component
-    // because we want to see empty profile form
+  const deleteDocument = async () => {
+    try {
+      setLoading(true);
+      await deleteUserProfile(userProfile.id);
+      clearProfile();
+      setError("");
+      setForm(emptyForm);
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
+      setError(err.message);
+      setLoading(false);
+    }
   };
 
   // 1. press on "edit"
@@ -151,6 +162,7 @@ const Profile = () => {
   if (userProfile && !editor)
     return (
       <div>
+        <Link to='/'>Back</Link>
         <h1>{user.email}</h1>
         <p>Name: {userProfile.name}</p>
         <p>City: {userProfile.city}</p>
@@ -190,6 +202,28 @@ const Profile = () => {
             setForm({
               ...form,
               name: e.target.value,
+            });
+          }}
+        />
+        <label>Contact Email</label>
+        <input
+          type='email'
+          value={form.email}
+          onChange={(e) => {
+            setForm({
+              ...form,
+              email: e.target.value,
+            });
+          }}
+        />
+        <label>About Me</label>
+        <textarea
+          // type='area'
+          value={form.description}
+          onChange={(e) => {
+            setForm({
+              ...form,
+              description: e.target.value,
             });
           }}
         />
