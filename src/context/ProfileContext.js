@@ -28,6 +28,7 @@ const ProfileProvider = ({ children }) => {
   // D- DELETE
 
   const [userProfile, setUserProfile] = useState();
+  const [profiles, setProfiles] = useState([]);
 
   // POST (ADD)
   const addProfile = async (profile) => {
@@ -43,15 +44,26 @@ const ProfileProvider = ({ children }) => {
     });
   };
 
+  // GET ALL PROFILES
+  const getAllProfiles = async () => {
+    console.log("getting all profiles");
+    const querySnapshot = await getDocs(collection(db, "profiles"));
+    const newProfiles = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      newProfiles.push({ ...data, id: doc.id });
+    });
+    setProfiles(newProfiles);
+  };
+
   // GET USER PROFILE
   const getUserProfile = async (userId) => {
     if (typeof userId !== "string") {
       throw new Error("user id must be a string");
     }
 
-    const colRef = collection(db, "profiles");
-    const q = query(colRef, where("userId", "==", userId));
-    const querySnapshot = await getDocs(q);
+    const q = query(collection(db, "profiles"), where("userId", "==", userId));
+    const querySnapshot = await getDocs(q); // get all docs that their "userId" field is equal to userId
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       setUserProfile({ ...data, id: doc.id });
@@ -77,12 +89,19 @@ const ProfileProvider = ({ children }) => {
     await deleteDoc(docRef);
   };
 
+  const clearProfile = () => {
+    setUserProfile(null);
+  };
+
   const exports = {
     addProfile,
     getUserProfile,
     userProfile,
     editUserProfile,
     deleteUserProfile,
+    clearProfile,
+    getAllProfiles,
+    profiles,
   };
 
   return (
