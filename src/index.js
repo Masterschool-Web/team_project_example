@@ -8,8 +8,8 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ProfileProvider from "./context/ProfileContext";
 import Profile from "./pages/Profile";
-import { Listing } from "./pages/Listing";
-import { Application } from "./pages/Application";
+import Listing from "./pages/Listing";
+import Application from "./pages/Application";
 
 const router = createBrowserRouter([
   {

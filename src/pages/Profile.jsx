@@ -8,17 +8,6 @@ const Profile = () => {
   const today = new Date();
   const jsonToday = today.toJSON().split("T");
   const [date] = jsonToday;
-  // const [profile, setProfile] = useState({
-  //   name: "",
-  //   city: "amsterdam",
-  //   startDate: date,
-  //   endDate: null,
-  //   guests: 0,
-  //   gender: "",
-  //   kids: false,
-  //   active: false,
-  // });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [editor, setEditor] = useState(false);
@@ -34,47 +23,25 @@ const Profile = () => {
   const { user, userLoading } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState(
-    userProfile ?? {
-      name: "",
-      age: "",
-      about: "",
-      gender: "",
-      kids: false,
-      numberKids: 0,
-    }
-  );
+  const emptyForm = {
+    name: "",
+    age: "",
+    about: "",
+    gender: "",
+  };
+
+  const [form, setForm] = useState(userProfile ?? emptyForm);
 
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name) {
-      return setError("Name is required");
+    console.log("sbubmitting");
+
+    if (form.about.length > 300) {
+      return setError("About me section must be less than 300");
     }
 
-    if (!form.city) {
-      return setError("City is required");
-    }
-
-    const startDate = new Date(form.startDate);
-    const dateObj = new Date(date);
-    const endDate = new Date(form.endDate);
-
-    if (startDate.getTime() < dateObj.getTime()) {
-      return setError("Start date should be later than today");
-    }
-
-    if (endDate.getTime() <= dateObj.getTime()) {
-      return setError("End date should be later than today");
-    }
-
-    if (endDate.getTime() <= startDate.getTime()) {
-      return setError("End date should be later than start date");
-    }
-
-    if (form.guests <= 0) {
-      return setError("Number of guests should be greater than 0");
-    }
+    const age = parseInt(form.age);
 
     setError("");
 
@@ -84,6 +51,7 @@ const Profile = () => {
       if (!editor) {
         await addProfile({
           ...form,
+          age,
           userId: user.uid,
         });
       }
@@ -91,6 +59,7 @@ const Profile = () => {
       if (editor) {
         await editUserProfile({
           ...form,
+          age,
           userId: user.uid,
         });
       }
@@ -143,33 +112,16 @@ const Profile = () => {
     }
   };
 
-  // 1. press on "edit"
-  // => change to form
-  // => form is not empty
-  // => form is full of the data from database
-  // submit button
-
-  // 2. press on submit
-  // => update the firebase database
-
   if (loading || userLoading) return <div>loading...</div>;
 
   if (userProfile && !editor)
     return (
       <div>
         <Link to='/'>Back</Link>
-        <h1>{user.email}</h1>
-        <p>Name: {userProfile.name}</p>
-        <p>City: {userProfile.city}</p>
-        <p>
-          preferred guests' gender:{" "}
-          {!userProfile.gender ? "Non preferred" : userProfile.gender}
-        </p>
-        <p>Number of guests: {userProfile.guests}</p>
-        <p>Kids allowed: {userProfile.kids ? "yes" : "no"}</p>
-        <p>
-          {userProfile.startDate}-{userProfile.endDate}
-        </p>
+        <h1>{user.name}</h1>
+        <p>Age: {userProfile.age}</p>
+        <p>About: {userProfile.about}</p>
+        <p>Gender: {userProfile.gender}</p>
         <button onClick={openEditor}>Edit</button>
         <button onClick={deleteDocument}>Delete</button>
       </div>
@@ -191,6 +143,7 @@ const Profile = () => {
         {error && <p style={{ color: "red" }}>{error}</p>}
         <label>Name</label>
         <input
+          required
           type='text'
           value={form.name}
           onChange={(e) => {
@@ -200,71 +153,32 @@ const Profile = () => {
             });
           }}
         />
-        <label>Contact Email</label>
+        <label>Age</label>
         <input
-          type='email'
-          value={form.email}
+          required
+          type='number'
+          value={form.age}
           onChange={(e) => {
             setForm({
               ...form,
-              email: e.target.value,
+              age: e.target.value,
             });
           }}
         />
         <label>About Me</label>
         <textarea
-          // type='area'
-          value={form.description}
+          required
+          value={form.about}
           onChange={(e) => {
             setForm({
               ...form,
-              description: e.target.value,
-            });
-          }}
-        />
-        <label>City</label>
-        <select
-          onChange={(e) =>
-            setForm({
-              ...form,
-              city: e.target.value,
-            })
-          }
-          value={form.city}
-        >
-          <option disabled>Choose...</option>
-          <option default value='amsterdam'>
-            Amsterdam
-          </option>
-          <option value='utrecht'>Utrecht</option>
-          <option value='rotterdam'>Rotterdam</option>
-          <option value='den haag'>Den Haag</option>
-          <option value='tilburg'>Tilburg</option>
-        </select>
-        <label>Start Date</label>
-        <input
-          type='date'
-          value={form.startDate}
-          onChange={(e) => {
-            setForm({
-              ...form,
-              startDate: e.target.value,
-            });
-          }}
-        />
-        <label>End Date</label>
-        <input
-          type='date'
-          value={form.endDate}
-          onChange={(e) => {
-            setForm({
-              ...form,
-              endDate: e.target.value,
+              about: e.target.value,
             });
           }}
         />
         <label>Gender</label>
         <select
+          required
           onChange={(e) =>
             setForm({
               ...form,
@@ -274,38 +188,9 @@ const Profile = () => {
           value={form.gender}
         >
           <option disabled>Choose...</option>
-          <option default value=''>
-            I Don't Care
-          </option>
-          <option value='female'>Female Only</option>
-          <option value='male'>Male only</option>
-        </select>
-        <label>Guests</label>
-        <input
-          type='number'
-          value={form.guests}
-          onChange={(e) => {
-            setForm({
-              ...form,
-              guests: e.target.value < 0 ? 0 : parseInt(e.target.value),
-            });
-          }}
-        />
-        <label>Kids</label>
-        <select
-          onChange={(e) =>
-            setForm({
-              ...form,
-              kids: e.target.value,
-            })
-          }
-          value={form.kids}
-        >
-          <option disabled>Choose...</option>
-          <option default value={true}>
-            No kids
-          </option>
-          <option value={false}>Kids are welcome</option>
+          <option value='female'>Female</option>
+          <option value='male'>Male</option>
+          <option value='other'>Other</option>
         </select>
         {!editor ? (
           <input type='submit' value='SUBMIT' />
