@@ -8,11 +8,13 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ProfileProvider from "./context/ProfileContext";
 import Profile from "./pages/Profile";
+import { Listing } from "./pages/Listing";
+import { Application } from "./pages/Application";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <App />, // guests: all listing //host: all application
   },
   {
     path: "/register",
@@ -24,7 +26,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/profile",
-    element: <Profile />,
+    element: <Profile />, // Create your profile (name, about me, ...)
+  },
+  {
+    path: "/listing",
+    element: <Listing />, // Add a new listing
+  },
+  {
+    path: "/apply/:id",
+    element: <Application />, // Add a new listing
   },
 ]);
 

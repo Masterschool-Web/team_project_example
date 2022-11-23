@@ -4,7 +4,7 @@ import { useAuth } from "../context/authContext";
 import { useProfile } from "../context/ProfileContext";
 import { processFirebaseErrors } from "../firebase/errors";
 
-const Profile = () => {
+const Application = () => {
   const today = new Date();
   const jsonToday = today.toJSON().split("T");
   const [date] = jsonToday;
@@ -35,14 +35,15 @@ const Profile = () => {
 
   const [form, setForm] = useState(
     userProfile ?? {
-      name: "",
-      age: "",
-      about: "",
-      gender: "",
-      kids: false,
-      numberKids: 0,
+      startDate: date,
+      endDate: null,
+      guests: [],
+      active: false,
+      description: "",
     }
   );
+
+  // TODO: if there is profile, you cannot submit new one!
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -284,4 +285,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Application;
